@@ -1,0 +1,53 @@
+# ===========================================================================
+# FinScore PME — Docker Compose
+# Spins up FastAPI API + PostgreSQL database
+# ===========================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # PostgreSQL Database
+  # -------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: finscore_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finscore_user
+      POSTGRES_PASSWORD: finscore_pass
+      POSTGRES_DB: finscore_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finscore_user -d finscore_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------------------------------------------
+  # FastAPI Application
+  # -------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finscore_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://finscore_user:finscore_pass@db:5432/finscore_db
+      SECRET_KEY: production-change-this-secret-key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      ML_MODELS_DIR: ./ml_models
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./ml_models:/app/ml_models:ro
+
+volumes:
+  postgres_data:
+    driver: local

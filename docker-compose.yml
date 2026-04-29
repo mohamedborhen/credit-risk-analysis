@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./credit-risk-analysis/backend
+      dockerfile: Dockerfile
+    container_name: finscore-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Map the SQLite database to the host machine for persistence
+      - ./credit-risk-analysis/backend/finscore.db:/app/finscore.db
+    env_file:
+      - ./credit-risk-analysis/backend/.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./credit-risk-analysis/v2-pme-frontend
+      dockerfile: Dockerfile
+    container_name: finscore-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Explicitly bind the Next.js API route to the backend container internally or via localhost
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped

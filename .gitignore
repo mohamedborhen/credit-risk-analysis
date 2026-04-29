@@ -1,0 +1,11 @@
+node_modules/
+.venv/
+__pycache__/
+.next/
+dist/
+build/
+*.pyc
+.env
+.DS_Store
+*.joblib
+*.csv

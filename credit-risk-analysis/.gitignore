@@ -1,0 +1,14 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+env/
+
+# Data and Reports
+reports/*.pdf
+reports/shap_plots/
+
+# System files
+.DS_Store
